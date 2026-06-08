@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="IELTS">
 <meta name="theme-color" content="#1B3A6B">
-<link rel="manifest" href="manifest.json">
+<link rel="manifest" href="data:application/manifest+json;base64,eyJuYW1lIjogIklFTFRTIFZvY2FiIiwgInNob3J0X25hbWUiOiAiSUVMVFMiLCAic3RhcnRfdXJsIjogImluZGV4Lmh0bWwiLCAiZGlzcGxheSI6ICJzdGFuZGFsb25lIiwgImJhY2tncm91bmRfY29sb3IiOiAiI0VERjRGQSIsICJ0aGVtZV9jb2xvciI6ICIjMUIzQTZCIiwgImljb25zIjogW3sic3JjIjogImljb24uc3ZnIiwgInNpemVzIjogImFueSIsICJ0eXBlIjogImltYWdlL3N2Zyt4bWwiLCAicHVycG9zZSI6ICJhbnkgbWFza2FibGUifV19">
 <link rel="apple-touch-icon" href="icon.svg">
 <title>IELTS Vocab</title>
 <style>
@@ -1414,6 +1414,10 @@ function snapCardBack() {
 
 // ── Boot ──────────────────────────────────────────────────────────────────────
 loadSettings(); init(); initSwipe();
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
 </script>
 </body>
 </html>
