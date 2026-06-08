@@ -1,0 +1,11 @@
+{
+  "name": "IELTS Vocab",
+  "short_name": "IELTS",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#EDF4FA",
+  "theme_color": "#1B3A6B",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
