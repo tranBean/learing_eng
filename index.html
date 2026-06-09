@@ -220,6 +220,10 @@ input:checked + .toggle-slider:before{transform:translateX(22px)}
 input[type=range]{width:100%;accent-color:var(--indigo);height:4px}
 .swipe-hint{display:flex;justify-content:center;gap:16px;padding:10px 16px 14px;flex-wrap:wrap}
 .swipe-hint-item{display:flex;align-items:center;gap:5px;font-size:13px;font-weight:600}
+.color-picker-row{display:flex;gap:10px;padding:4px 0 8px}
+.color-swatch{width:44px;height:44px;border-radius:10px;border:2px solid var(--border);cursor:pointer;transition:.15s;display:flex;align-items:center;justify-content:center;font-size:18px}
+.color-swatch.active{border-color:var(--indigo);box-shadow:0 0 0 3px rgba(27,58,107,.15)}
+.font-reset-btn{font-size:12px;font-weight:700;color:var(--indigo);background:var(--indigo-light);border:none;border-radius:6px;padding:4px 10px;cursor:pointer;margin-left:8px}
 .danger-btn{background:var(--red-bg);color:var(--red);border:1.5px solid var(--red);border-radius:var(--radius-sm);padding:12px 20px;font-size:14px;font-weight:700;cursor:pointer;width:100%;transition:.15s}
 .danger-btn:active{background:var(--red);color:#fff}
 
@@ -577,6 +581,31 @@ input[type=range]{width:100%;accent-color:var(--indigo);height:4px}
     </div>
 
     <!-- 数据 -->
+    <div class="settings-section">
+      <div class="settings-section-title">🎨 外观</div>
+      <div class="settings-slider-wrap">
+        <div class="settings-slider-label">
+          卡片背景色
+        </div>
+        <div class="color-picker-row">
+          <div class="color-swatch active" id="swatch-white" style="background:#ffffff" onclick="setCardBg('white')" title="默认白色">✓</div>
+          <div class="color-swatch" id="swatch-green" style="background:#F0FAF4" onclick="setCardBg('green')" title="护眼绿"></div>
+        </div>
+      </div>
+      <div class="settings-slider-wrap">
+        <div class="settings-slider-label">
+          <span>字体大小</span>
+          <span style="display:flex;align-items:center;gap:4px">
+            <span id="s-fontsize-val">16</span>px
+            <button class="font-reset-btn" onclick="resetFontSize()">重置</button>
+          </span>
+        </div>
+        <input type="range" id="s-fontsize" min="12" max="28" step="1" value="16"
+          oninput="document.getElementById('s-fontsize-val').textContent=this.value"
+          onchange="saveSetting('fontSize',+this.value);applyAppearance()">
+      </div>
+    </div>
+
     <div class="settings-section">
       <div class="settings-section-title">🗂 数据</div>
       <div class="settings-row" style="flex-direction:column;align-items:flex-start;gap:8px">
@@ -1239,7 +1268,8 @@ function saveJson(key, val) { localStorage.setItem(key, JSON.stringify(val)); }
 // ── Settings ─────────────────────────────────────────────────────────────────
 const SETTINGS_DEFAULTS = {
   autoPlay: true, autoPlayTwice: false, newPerDay: 50, playSpeed: 1.0,
-  readSentences: true, readZh: false, swipeEnabled: true, swipeReverse: false
+  readSentences: true, readZh: false, swipeEnabled: true, swipeReverse: false,
+  cardBg: 'white', fontSize: 16
 };
 let settings = {...SETTINGS_DEFAULTS};
 
@@ -1286,12 +1316,40 @@ function openSettings() {
   document.getElementById('s-swipe').checked        = settings.swipeEnabled;
   document.getElementById('s-swipe-reverse').checked = settings.swipeReverse;
   document.getElementById('s-row-zh').style.opacity  = settings.readSentences ? '1' : '.45';
+  document.getElementById('s-fontsize').value         = settings.fontSize;
+  document.getElementById('s-fontsize-val').textContent = settings.fontSize;
+  document.getElementById('swatch-white').classList.toggle('active', settings.cardBg === 'white');
+  document.getElementById('swatch-green').classList.toggle('active', settings.cardBg === 'green');
   updateSwipeHint();
   // speed buttons
   document.querySelectorAll('#s-speed-btns .settings-speed-btn').forEach(b => {
     b.classList.toggle('active', parseFloat(b.textContent) === settings.playSpeed);
   });
   goTo('screen-settings');
+}
+
+const CARD_BG = { white: '#ffffff', green: '#F0FAF4' };
+
+function applyAppearance() {
+  const bg = CARD_BG[settings.cardBg] || '#ffffff';
+  document.getElementById('flash-card').style.background = bg;
+  const sz = settings.fontSize || 16;
+  document.getElementById('flash-card').style.fontSize = sz + 'px';
+}
+
+function setCardBg(val) {
+  saveSetting('cardBg', val);
+  document.getElementById('swatch-white').classList.toggle('active', val === 'white');
+  document.getElementById('swatch-green').classList.toggle('active', val === 'green');
+  applyAppearance();
+}
+
+function resetFontSize() {
+  saveSetting('fontSize', 16);
+  document.getElementById('s-fontsize').value = 16;
+  document.getElementById('s-fontsize-val').textContent = 16;
+  applyAppearance();
+  showToast('字体已重置为默认');
 }
 
 function updateSwipeHint() {
@@ -1425,7 +1483,7 @@ function snapCardBack() {
 }
 
 // ── Boot ──────────────────────────────────────────────────────────────────────
-loadSettings(); init(); initSwipe();
+loadSettings(); init(); initSwipe(); applyAppearance();
 
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js').catch(() => {});
