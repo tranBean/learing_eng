@@ -1331,10 +1331,26 @@ function openSettings() {
 const CARD_BG = { white: '#ffffff', green: '#F0FAF4' };
 
 function applyAppearance() {
+  // background
   const bg = CARD_BG[settings.cardBg] || '#ffffff';
   document.getElementById('flash-card').style.background = bg;
-  const sz = settings.fontSize || 16;
-  document.getElementById('flash-card').style.fontSize = sz + 'px';
+
+  // font scale: base is 16px
+  const scale = (settings.fontSize || 16) / 16;
+  let style = document.getElementById('dynamic-appearance');
+  if (!style) {
+    style = document.createElement('style');
+    style.id = 'dynamic-appearance';
+    document.head.appendChild(style);
+  }
+  style.textContent = `
+    .card-word        { font-size: ${Math.round(40 * scale)}px !important; }
+    .card-phonetic    { font-size: ${Math.round(15 * scale)}px !important; }
+    .card-back-word   { font-size: ${Math.round(22 * scale)}px !important; }
+    .card-back-phonetic{ font-size:${Math.round(13 * scale)}px !important; }
+    .card-back-meaning{ font-size: ${Math.round(17 * scale)}px !important; }
+    .detail-text      { font-size: ${Math.round(13 * scale)}px !important; }
+  `;
 }
 
 function setCardBg(val) {

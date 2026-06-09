@@ -1,4 +1,4 @@
-const CACHE = 'ielts-v1';
+const CACHE = 'ielts-v2';
 const FILES = ['index.html', 'words.js', 'icon.svg'];
 
 self.addEventListener('install', e => {
