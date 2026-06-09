@@ -598,6 +598,7 @@ input[type=range]{width:100%;accent-color:var(--indigo);height:4px}
 let allWords = [];       // merged base + custom
 let progress = {};       // wordId -> {level, nextReview, reviewCount}
 let sessionQueue = [];   // words for current session
+let sessionRetries = {}; // wordId -> retry count for current session
 let sessionIdx = 0;
 let todayDone = 0;
 let currentWord = null;
@@ -648,8 +649,8 @@ function advanceWord(id, rating) {
   // rating: 1=no, 0=vague, 2=yes
   const p = progress[id] || {level:0, reviewCount:0};
   if (rating === 2) p.level = Math.min(5, p.level + 1);
-  else if (rating === 0) p.level = Math.max(1, p.level); // stay
-  else p.level = 1; // reset
+  else if (rating === 0) p.level = Math.max(1, p.level - 1); // drop one level
+  else p.level = Math.max(0, p.level - 2); // drop two levels
   const days = INTERVALS[p.level];
   const next = new Date(); next.setDate(next.getDate() + days);
   p.nextReview = next.toISOString().slice(0,10);
@@ -703,6 +704,7 @@ function updateHome() {
 // ── Session ───────────────────────────────────────────────────────────────────
 function startSession() {
   sessionQueue = buildSession();
+  sessionRetries = {};
   let freeMode = false;
   if (sessionQueue.length === 0) {
     // SRS queue empty (all reviewed / scheduled ahead) → free-practice fallback.
@@ -801,6 +803,16 @@ document.getElementById('flash-card').addEventListener('click', function(e) {
 });
 
 function rateCard(rating) {
+  if (rating === 1) {
+    const retries = sessionRetries[currentWord.id] || 0;
+    if (retries < 2) {
+      sessionRetries[currentWord.id] = retries + 1;
+      sessionQueue.push(currentWord);
+      sessionIdx++;
+      showCard();
+      return;
+    }
+  }
   advanceWord(currentWord.id, rating);
   todayDone = incrementTodayDone();
   sessionIdx++;
